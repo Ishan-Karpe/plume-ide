@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Darker_Grotesque, IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { shadcn } from "@clerk/themes";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -43,20 +44,23 @@ export default function RootLayout({
         className={cn("h-full", "antialiased", inter.variable, plexMono.variable, darkerGrotesque.variable, "font-sans")}
       >
         <body className="min-h-full flex flex-col">
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>{children}
-            <header>
-              <Show when="signed-out">
-                <SignInButton/>
-                  <SignUpButton>
-                    <button>
-                      Sign Up
-                    </button>
-                  </SignUpButton>
-              </Show>
-              <Show when="signed-in">
-                <UserButton/>
-              </Show>
-            </header>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <ConvexClientProvider>
+              <header>
+                <Show when="signed-out">
+                  <SignInButton/>
+                    <SignUpButton>
+                      <button>
+                        Sign Up
+                      </button>
+                    </SignUpButton>
+                </Show>
+                <Show when="signed-in">
+                  <UserButton/>
+                </Show>
+              </header>
+              {children}
+            </ConvexClientProvider>
           </ThemeProvider>
         </body>
       </html>
