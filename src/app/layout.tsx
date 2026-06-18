@@ -2,17 +2,14 @@ import type { Metadata } from "next";
 import { Darker_Grotesque, IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { ConvexClientProvider } from "@/components/ConvexClientProvider";
-import { ClerkProvider, Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import { shadcn } from "@clerk/themes";
-import { ThemeProvider } from "@/components/theme-provider";
+import { Providers } from "@/components/providers";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"]
+  weight: ["400", "500", "600", "700"],
 });
 
 const darkerGrotesque = Darker_Grotesque({
@@ -31,39 +28,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        theme: shadcn,
-        variables: {
-          fontFamily: darkerGrotesque.style.fontFamily,
-        },
-      }}
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        "h-full",
+        "antialiased",
+        inter.variable,
+        plexMono.variable,
+        darkerGrotesque.variable,
+        "font-sans",
+      )}
     >
-      <html
-        lang="en" suppressHydrationWarning
-        className={cn("h-full", "antialiased", inter.variable, plexMono.variable, darkerGrotesque.variable, "font-sans")}
-      >
-        <body className="min-h-full flex flex-col">
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-            <ConvexClientProvider>
-              <header>
-                <Show when="signed-out">
-                  <SignInButton/>
-                    <SignUpButton>
-                      <button>
-                        Sign Up
-                      </button>
-                    </SignUpButton>
-                </Show>
-                <Show when="signed-in">
-                  <UserButton/>
-                </Show>
-              </header>
-              {children}
-            </ConvexClientProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
+    </html>
   );
 }
