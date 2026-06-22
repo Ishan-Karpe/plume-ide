@@ -4,13 +4,36 @@ import { inngest } from "./client";
 import { google } from "@ai-sdk/google";
 import { anthropic } from "@ai-sdk/anthropic";
 
+const URL_REGEX = /https?:\/\/[^\s]+/g;
+
 export const demoGenerate = inngest.createFunction(
   { id: "demo-generate", triggers: { event: "demo/generate" } },
-  async ({ step }) => {
+  async ({ event, step }) => {
+
+    const { prompt } = event.data as { prompt: string; };
+    const urls = await step.run("extract-urls", async () => {
+      return prompt.match(URL_REGEX) ?? [];
+    }) as string[];
+
+    const scrapedContent = await step.run("scrape-urls", async () => {
+      const results = await Promise.all(
+        urls.map(async (url: string) => {
+          const result = await firecrawl.scrape(url, {
+            formats: ["markdown"],
+          });
+          return result.markdown ?? "";
+        })
+      );
+      return results.filter(Boolean).join("\n\n");
+    });
+
+    const finalPrompt = scrapedContent ? `Context:\n${scrapedContent}\n\nQuestion: ${prompt}` : prompt;
+
+
     await step.run("generate-text", async () => {
         return await generateText({
             model: google("gemini-3.5-flash"),
-            prompt: "Write a butter chicken recipe for a Indian 16 year old who likes spice.",
+            prompt: finalPrompt,
         });
     })
   },
